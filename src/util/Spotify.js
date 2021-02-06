@@ -1,6 +1,6 @@
 let accessToken;
 const clientID = '91e533c2c20d4256bdace4065cce4716';
-const redirectURI = 'https://jammming089.surge.sh';
+const redirectURI = 'http://localhost:3000/'; //Change this back to https://jammming089.surge.sh after messing around
 
 const Spotify = {
     getAccessToken(){
@@ -14,7 +14,6 @@ const Spotify = {
         if (accessInURL && expirationTime){
             accessToken = accessInURL[1];
             const expires = Number(expirationTime[1]);
-            console.log(expires);
             window.setTimeout(() => accessToken = '', expires * 1000);
             window.history.pushState('Access Token', null, '/');
             return accessToken;
@@ -24,28 +23,25 @@ const Spotify = {
         }
     },
 
-
-    search(searchTerm) {
+    async search(searchTerm) {
         const accessToken = Spotify.getAccessToken();
-        return fetch(`https://api.spotify.com/v1/search?type=track&q=${searchTerm}`,  {
-                        headers: {Authorization: `Bearer ${accessToken}`}
-                    }
-                    ).then(response => {
-                        return response.json()
-                        })
-                    .then(jsonresponse => {
-                        if (!jsonresponse.tracks){
-                            return [];
-                        }
-                        return jsonresponse.tracks.items.map(track => ({
-                            id: track.id,
-                            name: track.name,
-                            artist: track.artists[0].name,
-                            album: track.album.name,
-                            uri: track.uri})
-                            )       
-                    });
-                },
+        const response = await fetch(`https://api.spotify.com/v1/search?type=track&q=${searchTerm}`,  {
+            headers: {Authorization: `Bearer ${accessToken}`}
+        });
+        const jsonresponse = await response.json();
+        console.log(jsonresponse);
+        if (!jsonresponse.tracks){
+            return [];
+        };
+        return jsonresponse.tracks.items.map(track => ({
+            id: track.id,
+            name: track.name,
+            artist: track.artists[0].name,
+            album: track.album.name,
+            uri: track.uri
+        })
+        );
+    },
 
    savePlaylist(name, uriArray) {
         if (!name || !uriArray){
