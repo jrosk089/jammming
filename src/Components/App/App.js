@@ -13,7 +13,9 @@ class App extends React.Component {
 
                     playlistName: 'My Playlist',
 
-                    playlistTracks: []
+                    playlistTracks: [],
+
+                    noTracksFound: false
                   };
     this.addTrack = this.addTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
@@ -51,9 +53,13 @@ class App extends React.Component {
   }
 
   search(searchTerm) {
-  Spotify.search(searchTerm).then(results => {
+  Spotify.search(searchTerm)
+    .then(results => {
     this.setState({ searchResults: results })
-  })
+    })
+    .then(() => {
+      (this.state.searchResults.length < 1) ? this.setState({ noTracksFound: true }) : this.setState({ noTracksFound: false })
+    });
   }
 
   render(){
@@ -64,7 +70,8 @@ class App extends React.Component {
           <SearchBar onSearch={this.search} />
           <div className="App-playlist">
             <SearchResults  searchResults={this.state.searchResults} 
-                            onAdd={this.addTrack} 
+                            onAdd={this.addTrack}
+                            noTracksFound={this.state.noTracksFound}
                             />
             <Playlist playlistName={this.state.playlistName} 
                       playlistTracks={this.state.playlistTracks} 
